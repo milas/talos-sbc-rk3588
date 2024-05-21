@@ -1,0 +1,10 @@
+name: sbc-board
+variant: scratch
+dependencies:
+  - stage: board
+  - stage: u-boot
+    platform: linux/arm64
+  - stage: profiles
+finalize:
+  - from: /rootfs
+    to: /
