@@ -6,14 +6,17 @@ variant: scratch
 shell: /toolchain/bin/bash
 dependencies:
   - stage: base
+  - stage: rkbin
 steps:
   - sources:
-      - url: https://ftp.denx.de/pub/u-boot/u-boot-{{ .uboot_version }}.tar.bz2
+      - url: https://gitlab.collabora.com/hardware-enablement/rockchip-3588/u-boot/-/archive/{{ .uboot_version }}/u-boot-{{ .uboot_version }}.tar.bz2
         destination: u-boot.tar.bz2
         sha256: "{{ .uboot_sha256 }}"
         sha512: "{{ .uboot_sha512 }}"
     env:
       SOURCE_DATE_EPOCH: {{ .BUILD_ARG_SOURCE_DATE_EPOCH }}
+      ROCKCHIP_TPL: /libs/rkbin/bin/rk35/rk3588_ddr_lp4_2112MHz_lp5_2400MHz_v1.16.bin
+      BL31: /libs/rkbin/bin/rk35/rk3588_bl31_v1.45.elf
     prepare:
       - |
         mkdir -p /usr/bin \
@@ -24,14 +27,14 @@ steps:
 
         tar xf u-boot.tar.bz2 --strip-components=1
       - |
-        make board_defconfig
+        make rock5b-rk3588_defconfig
     build:
       - |
         make -j $(nproc) HOSTLDLIBS_mkimage="-lssl -lcrypto"
     install:
       - |
-        mkdir -p /rootfs/artifacts/arm64/u-boot/board
-        cp -v u-boot.bin /rootfs/artifacts/arm64/u-boot/board
+        mkdir -p /rootfs/artifacts/arm64/u-boot/rock5b
+        cp -v u-boot.bin /rootfs/artifacts/arm64/u-boot/rock5b
 finalize:
   - from: /rootfs
     to: /rootfs

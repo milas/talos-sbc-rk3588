@@ -1,7 +1,7 @@
-name: sbc-board
+name: sbc-rock5b
 variant: scratch
 dependencies:
-  - stage: board
+  - stage: rock5b
   - stage: u-boot
     platform: linux/arm64
   - stage: profiles

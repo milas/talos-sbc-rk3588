@@ -1,0 +1,11 @@
+# commit to be tagged for the new release
+commit = "HEAD"
+
+project_name = "talos-sbc-rock5"
+github_repo = "milas/talos-sbc-rock5"
+match_deps = "^github.com/(milas/[a-zA-Z0-9-]+)$"
+
+# previous = -
+# pre_release = true
+
+# [notes]

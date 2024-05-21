@@ -1,5 +1,5 @@
 name: profiles
 variant: scratch
 finalize:
-  - from: /pkg/board
+  - from: /pkg/rock5b
     to: /rootfs/profiles

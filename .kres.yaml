@@ -2,7 +2,7 @@
 kind: pkgfile.Build
 spec:
   targets:
-    - sbc-board
+    - sbc-rock5b
   extraBuildArgs:
     - PKGS_PREFIX
     - PKGS

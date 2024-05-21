@@ -1,4 +1,4 @@
-module board
+module rock5b
 
 go 1.22.1
 

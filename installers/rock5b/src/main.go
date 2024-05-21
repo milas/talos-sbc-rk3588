@@ -14,17 +14,17 @@ import (
 )
 
 func main() {
-	adapter.Execute(&BoardInstaller{})
+	adapter.Execute(&Rock5BInstaller{})
 }
 
-type BoardInstaller struct{}
+type Rock5BInstaller struct{}
 
-type boardExtraOptions struct {
+type rock5BExtraOptions struct {
 	Console    []string `json:"console"`
 	ConfigFile string   `json:"configFile"`
 }
 
-func (i *BoardInstaller) GetOptions(extra boardExtraOptions) (overlay.Options, error) {
+func (i *Rock5BInstaller) GetOptions(extra rock5BExtraOptions) (overlay.Options, error) {
 	kernelArgs := []string{
 		"console=tty0",
 		"sysctl.kernel.kexec_load_disabled=1",
@@ -34,12 +34,12 @@ func (i *BoardInstaller) GetOptions(extra boardExtraOptions) (overlay.Options, e
 	kernelArgs = append(kernelArgs, extra.Console...)
 
 	return overlay.Options{
-		Name:       "board",
+		Name:       "rock5b",
 		KernelArgs: kernelArgs,
 	}, nil
 }
 
-func (i *BoardInstaller) Install(options overlay.InstallOptions[boardExtraOptions]) error {
+func (i *Rock5BInstaller) Install(options overlay.InstallOptions[rock5BExtraOptions]) error {
 	// allows to copy a directory from the overlay to the target
 	// err := copy.Dir(filepath.Join(options.ArtifactsPath, "arm64/firmware/boot"), filepath.Join(options.MountPrefix, "/boot/EFI"))
 	// if err != nil {
@@ -47,7 +47,7 @@ func (i *BoardInstaller) Install(options overlay.InstallOptions[boardExtraOption
 	// }
 
 	// allows to copy a file from the overlay to the target
-	err := copy.File(filepath.Join(options.ArtifactsPath, "arm64/u-boot/board/u-boot.bin"), filepath.Join(options.MountPrefix, "/boot/EFI/u-boot.bin"))
+	err := copy.File(filepath.Join(options.ArtifactsPath, "arm64/u-boot/rock5b/u-boot.bin"), filepath.Join(options.MountPrefix, "/boot/EFI/u-boot.bin"))
 	if err != nil {
 		return err
 	}

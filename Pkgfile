@@ -4,8 +4,14 @@ format: v1alpha2
 
 vars:
   # renovate: datasource=github-tags extractVersion=^v(?<version>.*)$ depName=u-boot/u-boot
-  uboot_version: 2023.01
-  uboot_sha256: 69423bad380f89a0916636e89e6dcbd2e4512d584308d922d1039d1e4331950f
-  uboot_sha512: 417a28267eb7875820d08fafc7316f164663609378637539e71648b0b9b7d28796b6c381717f31b0ab6472805fefd32628ef7d1b2e7b9f3c51c8ad122993f679
+  uboot_version: 5557bfdc869a2b4f5c5394e6702d32ed5768c7ba # 2024.01-rk3588
+  uboot_sha256: b56026253205f45605edee46d415511ab1bdfc77fe3d80ab47fce66f8dba6875
+  uboot_sha512: 9bef96ee388cccca1cd03418d3f2309f5a63c7928fcc08d016a5ced3d87f7e42d74787d666ced15f2eb0d3115c41900f2b7a8d2d96905607816cf403625b7a8f
+
+  # renovate: datasource=git-refs versioning=git depName=https://github.com/rockchip/rkbin
+  rkbin_ref: a2a0b89b6c8c612dca5ed9ed8a68db8a07f68bc0
+  rkbin_sha256: 9df375316869daadbf874410f4097591c32cc2dca5a30fd328ea7a1cd8f8b6a8
+  rkbin_sha512: 715253b5ef5c7fbcbce8478d4dea5ad3d1b4b738da437b5f0e9b31eed20f9bcb86cab082e4c04c69b42b6ffcc2cbb1a31079b33b968bb76826ff0dd4f83043e1
+
 labels:
-  org.opencontainers.image.source: https://github.com/siderolabs/sbc-board
+  org.opencontainers.image.source: https://github.com/milas/talos-sbc-rock5
