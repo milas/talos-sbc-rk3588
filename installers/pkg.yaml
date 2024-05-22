@@ -5,6 +5,10 @@ dependencies:
   - stage: u-boot
     platform: linux/arm64
   - stage: profiles
+  - image: 127.0.0.1:5005/siderolabs/kernel:v1.7.0-14-g9caa8be-dirty
+    platform: linux/arm64
+    from: /dtb/rockchip/rk3588-rock-5b.dtb
+    to: /rootfs/artifacts/arm64/dtb/rockchip/rk3588-rock-5b.dtb
 finalize:
   - from: /rootfs
     to: /

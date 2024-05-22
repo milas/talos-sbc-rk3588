@@ -6,15 +6,23 @@ package main
 
 import (
 	_ "embed"
-	"path/filepath"
-
+	"fmt"
 	"github.com/siderolabs/go-copy/copy"
 	"github.com/siderolabs/talos/pkg/machinery/overlay"
 	"github.com/siderolabs/talos/pkg/machinery/overlay/adapter"
+	"golang.org/x/sys/unix"
+	"os"
+	"path/filepath"
+)
+
+const (
+	off int64 = 512 * 64
+	// https://github.com/u-boot/u-boot/blob/4de720e98d552dfda9278516bf788c4a73b3e56f/configs/rock-pi-4c-rk3399_defconfig#L7=
+	dtb = "rockchip/rk3588-rock-5b.dtb"
 )
 
 func main() {
-	adapter.Execute(&Rock5BInstaller{})
+	adapter.Execute[rock5BExtraOptions](&Rock5BInstaller{})
 }
 
 type Rock5BInstaller struct{}
@@ -36,25 +44,46 @@ func (i *Rock5BInstaller) GetOptions(extra rock5BExtraOptions) (overlay.Options,
 	return overlay.Options{
 		Name:       "rock5b",
 		KernelArgs: kernelArgs,
+		PartitionOptions: overlay.PartitionOptions{
+			Offset: 2048 * 10,
+		},
 	}, nil
 }
 
 func (i *Rock5BInstaller) Install(options overlay.InstallOptions[rock5BExtraOptions]) error {
-	// allows to copy a directory from the overlay to the target
-	// err := copy.Dir(filepath.Join(options.ArtifactsPath, "arm64/firmware/boot"), filepath.Join(options.MountPrefix, "/boot/EFI"))
-	// if err != nil {
-	// 	return err
-	// }
+	var f *os.File
 
-	// allows to copy a file from the overlay to the target
-	err := copy.File(filepath.Join(options.ArtifactsPath, "arm64/u-boot/rock5b/u-boot.bin"), filepath.Join(options.MountPrefix, "/boot/EFI/u-boot.bin"))
+	f, err := os.OpenFile(options.InstallDisk, os.O_RDWR|unix.O_CLOEXEC, 0o666)
+	if err != nil {
+		return fmt.Errorf("failed to open %s: %w", options.InstallDisk, err)
+	}
+
+	defer f.Close() //nolint:errcheck
+
+	uboot, err := os.ReadFile(filepath.Join(options.ArtifactsPath, "arm64/u-boot/rock5b/u-boot.bin"))
 	if err != nil {
 		return err
 	}
 
-	if options.ExtraOptions.ConfigFile != "" {
-		// do something with the config file
+	if _, err = f.WriteAt(uboot, off); err != nil {
+		return err
 	}
 
-	return nil
+	// NB: In the case that the block device is a loopback device, we sync here
+	// to ensure that the file is written before the loopback device is
+	// unmounted.
+	err = f.Sync()
+	if err != nil {
+		return err
+	}
+
+	src := filepath.Join(options.ArtifactsPath, "arm64/dtb", dtb)
+	dst := filepath.Join(options.MountPrefix, "/boot/EFI/dtb", dtb)
+
+	err = os.MkdirAll(filepath.Dir(dst), 0o600)
+	if err != nil {
+		return err
+	}
+
+	return copy.File(src, dst)
 }
