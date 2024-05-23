@@ -17,6 +17,7 @@ steps:
       SOURCE_DATE_EPOCH: {{ .BUILD_ARG_SOURCE_DATE_EPOCH }}
       ROCKCHIP_TPL: /libs/rkbin/bin/rk35/rk3588_ddr_lp4_2112MHz_lp5_2400MHz_v1.16.bin
       BL31: /libs/rkbin/bin/rk35/rk3588_bl31_v1.45.elf
+      CFLAGS: "-DCONFIG_LOG=y -DCONFIG_LOG_CONSOLE=y -DCONFIG_LOG_MAX_LEVEL=9"
     prepare:
       - |
         mkdir -p /usr/bin \
@@ -34,7 +35,7 @@ steps:
     install:
       - |
         mkdir -p /rootfs/artifacts/arm64/u-boot/rock5b
-        cp -v u-boot.bin /rootfs/artifacts/arm64/u-boot/rock5b
+        cp -v u-boot-rockchip.bin /rootfs/artifacts/arm64/u-boot/rock5b
 finalize:
   - from: /rootfs
     to: /rootfs

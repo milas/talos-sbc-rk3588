@@ -34,9 +34,19 @@ type rock5BExtraOptions struct {
 
 func (i *Rock5BInstaller) GetOptions(extra rock5BExtraOptions) (overlay.Options, error) {
 	kernelArgs := []string{
-		"console=tty0",
 		"sysctl.kernel.kexec_load_disabled=1",
 		"talos.dashboard.disabled=1",
+		"slab_nomerge",
+		"earlycon=uart8250,mmio32,0xfeb50000",
+		"console=ttyFIQ0,1500000n8",
+		"consoleblank=0",
+		"console=ttyS2,1500000n8",
+		"console=tty1",
+		"loglevel=7",
+		"cgroup_enable=cpuset",
+		"swapaccount=1",
+		"irqchip.gicv3_pseudo_nmi=0",
+		"coherent_pool=2M",
 	}
 
 	kernelArgs = append(kernelArgs, extra.Console...)
@@ -60,7 +70,7 @@ func (i *Rock5BInstaller) Install(options overlay.InstallOptions[rock5BExtraOpti
 
 	defer f.Close() //nolint:errcheck
 
-	uboot, err := os.ReadFile(filepath.Join(options.ArtifactsPath, "arm64/u-boot/rock5b/u-boot.bin"))
+	uboot, err := os.ReadFile(filepath.Join(options.ArtifactsPath, "arm64/u-boot/rock5b/u-boot-rockchip.bin"))
 	if err != nil {
 		return err
 	}
