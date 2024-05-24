@@ -3,6 +3,7 @@ kind: pkgfile.Build
 spec:
   targets:
     - sbc-rock5b
+    - kernel
   extraBuildArgs:
     - PKGS_PREFIX
     - PKGS

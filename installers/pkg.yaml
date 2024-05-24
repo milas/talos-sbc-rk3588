@@ -4,10 +4,10 @@ dependencies:
   - stage: rock5b
   - stage: u-boot
     platform: linux/arm64
-  - stage: kernel
-#    platform: linux/arm64
-#    from: /dtb/rockchip/rk3588-rock-5b.dtb
-#    to: /rootfs/artifacts/arm64/dtb/rockchip/rk3588-rock-5b.dtb
+  - image: 127.0.0.1:5005/milas/kernel:v1.7.0-18-g05ca14c
+    platform: linux/arm64
+    from: /dtb/rockchip/rk3588-rock-5b.dtb
+    to: /rootfs/artifacts/arm64/dtb/rockchip/rk3588-rock-5b.dtb
   - stage: profiles
 finalize:
   - from: /rootfs

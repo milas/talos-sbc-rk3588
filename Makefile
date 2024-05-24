@@ -1,6 +1,6 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED, PLEASE DO NOT EDIT.
 #
-# Generated on 2024-05-21T17:08:07Z by kres 04ecdaf.
+# Generated on 2024-05-23T14:13:24Z by kres 2688b70.
 
 # common variables
 
@@ -52,6 +52,7 @@ PKGS ?= v1.7.0-alpha.0-33-g3aacf03
 # targets defines all the available targets
 
 TARGETS = sbc-rock5b
+TARGETS += kernel
 
 # help menu
 
