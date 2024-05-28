@@ -71,14 +71,9 @@ jobs:
       - name: Push to registry
         if: github.event_name != 'pull_request'
         run: |
-          make  PUSH=true
-      - name: release-notes
-        if: startsWith(github.ref, 'refs/tags/')
-        run: |
-          make release-notes
+          make PUSH=true
       - name: Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: crazy-max/ghaction-github-release@v2
         with:
-          body_path: _out/RELEASE_NOTES.md
           draft: "true"
