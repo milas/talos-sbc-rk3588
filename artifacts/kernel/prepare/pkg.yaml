@@ -2,7 +2,7 @@ name: kernel-prepare
 variant: scratch
 shell: /toolchain/bin/bash
 dependencies:
-  - image: '{{ .TOOLS_IMAGE }}'
+  - image: "{{ .BUILD_ARG_PKGS_PREFIX }}/tools:{{ .BUILD_ARG_PKGS }}"
 steps:
   - sources:
       # HACK(rock5): use collabora's branch, there's still some outstanding changes in mainline

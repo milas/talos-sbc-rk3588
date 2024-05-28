@@ -24,7 +24,7 @@ steps:
           && ln -sf /toolchain/bin/env /usr/bin/env \
           && ln -sf /toolchain/bin/python3 /toolchain/bin/python
 
-        pip3 install pyelftools
+        pip3 install pyelftools setuptools
 
         tar xf u-boot.tar.bz2 --strip-components=1
       - |
