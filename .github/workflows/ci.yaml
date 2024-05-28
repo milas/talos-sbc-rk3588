@@ -1,7 +1,3 @@
-# THIS FILE WAS AUTOMATICALLY GENERATED, PLEASE DO NOT EDIT.
-#
-# Generated on 2024-05-23T14:13:24Z by kres 2688b70.
-
 name: default
 concurrency:
   group: ${{ github.head_ref || github.run_id }}
@@ -73,9 +69,6 @@ jobs:
         id: setup-buildx
         uses: docker/setup-buildx-action@v3
         with:
-          append: |
-            - endpoint: tcp://buildkit-arm64.ci.svc.cluster.local:1234
-              platforms: linux/arm64
           driver: remote
           endpoint: tcp://127.0.0.1:1234
       - name: Build
