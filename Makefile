@@ -51,8 +51,8 @@ PKGS ?= v1.7.0
 
 # targets defines all the available targets
 
-TARGETS = sbc-rock5b
-TARGETS += kernel
+TARGETS = talos-sbc-rock5b
+TARGETS += talos-rk3588-kernel
 
 # help menu
 
@@ -156,4 +156,3 @@ release-notes: $(ARTIFACTS)
 conformance:
 	@docker pull $(CONFORMANCE_IMAGE)
 	@docker run --rm -it -v $(PWD):/src -w /src $(CONFORMANCE_IMAGE) enforce
-

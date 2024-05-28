@@ -2,8 +2,8 @@
 kind: pkgfile.Build
 spec:
   targets:
-    - sbc-rock5b
-    - kernel
+    - talos-sbc-rock5b
+    - talos-rk3588-kernel
   extraBuildArgs:
     - PKGS_PREFIX
     - PKGS
