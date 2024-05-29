@@ -112,6 +112,9 @@ jobs:
           make imager PUSH=true
 
   boards:
+    permissions:
+      contents: write
+      packages: write
     needs: [sbc-rk3588]
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: [self-hosted]
