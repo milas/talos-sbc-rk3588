@@ -17,6 +17,8 @@ jobs:
   default:
     env:
       PLATFORM: linux/arm64
+      INSTALLER_ARCH: targetarch
+      USERNAME: ${{ github.repository_owner }}
     permissions:
       actions: read
       contents: write
@@ -58,7 +60,7 @@ jobs:
       - name: Unshallow
         run: |
           git fetch --prune --unshallow
-      - name: Build
+      - name: Build RK3588 overlay
         run: |
           make
       - name: Login to registry
@@ -67,11 +69,28 @@ jobs:
         with:
           password: ${{ secrets.GITHUB_TOKEN }}
           registry: ghcr.io
-          username: ${{ github.repository_owner }}
-      - name: Push to registry
+          username: ${{ env.USERNAME }}
+      - name: Push RK3588 overlay to registry
         if: github.event_name != 'pull_request'
         run: |
           make PUSH=true
+
+      - name: checkout
+        uses: actions/checkout@v4
+        if: github.event_name != 'pull_request'
+        with:
+          repository: milas/rock5-talos
+          ref: release-1.7
+          fetch-depth: 0
+          path: ./talos
+
+      - name: Build & push Talos imager
+        if: github.event_name != 'pull_request'
+        run: |
+          cd ./talos
+          export TAG=$(git describe --tag --always --dirty --match 'v[0-9]*')
+          make imager PUSH=true PKG_KERNEL=ghcr.io/${{ env.USERNAME }}/talos-rk3588-kernel:${TAG}
+
       - name: Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: crazy-max/ghaction-github-release@v2
