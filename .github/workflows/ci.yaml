@@ -13,12 +13,15 @@ concurrency:
     branches:
       - main
       - release-*
+
+
+env:
+  PLATFORM: linux/arm64
+  INSTALLER_ARCH: targetarch
+  USERNAME: ${{ github.repository_owner }}
+
 jobs:
-  default:
-    env:
-      PLATFORM: linux/arm64
-      INSTALLER_ARCH: targetarch
-      USERNAME: ${{ github.repository_owner }}
+  overlay:
     permissions:
       actions: read
       contents: write
@@ -57,9 +60,8 @@ jobs:
         continue-on-error: true
       - name: checkout
         uses: actions/checkout@v4
-      - name: Unshallow
-        run: |
-          git fetch --prune --unshallow
+        with:
+          fetch-depth: 0
       - name: Build RK3588 overlay
         run: |
           make
@@ -71,28 +73,87 @@ jobs:
           registry: ghcr.io
           username: ${{ env.USERNAME }}
       - name: Push RK3588 overlay to registry
+        id: push
         if: github.event_name != 'pull_request'
         run: |
           make PUSH=true
-
-      - name: checkout
+          echo "SBC_RK3588_TAG=$(git describe --tag --always --dirty --match 'v[0-9]*')" >> "$GITHUB_OUTPUT"
+      - name: Checkout Talos repo
         uses: actions/checkout@v4
-        if: github.event_name != 'pull_request'
         with:
           repository: milas/rock5-talos
           ref: release-1.7
           fetch-depth: 0
           path: ./talos
+      - name: Build RK3588 Talos imager
+        working-directory: ./talos
+        run: |
+          export PKG_KERNEL=ghcr.io/${{ env.USERNAME }}/talos-kernel-rk3588:${{ steps.push.outputs.SBC_RK3588_TAG }}"
+          echo "PKG_KERNEL=${PKG_KERNEL}" >> "$GITHUB_ENV"
+          make imager
+      - name: Login to registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ env.USERNAME }}
+      - name: Push RK3588 Talos imager
+        if: github.event_name != 'pull_request'
+        working-directory: ./talos
+        run: |
+          make imager PUSH=true
+  boards:
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: [self-hosted]
+    strategy:
+      matrix:
+        variant:
+          - board: rock-5a
+            chipset: rk3588s
+          - board: rock-5b
+            chipset: rk3588
+    steps:
+      - uses: imjasonh/setup-crane@v0.3
 
-      - name: Build & push Talos imager
+      - name: Build installer image
         if: github.event_name != 'pull_request'
         run: |
-          export TAG=$(git describe --tag --always --dirty --match 'v[0-9]*')
-          cd ./talos
-          make imager PUSH=true PKG_KERNEL=ghcr.io/${{ env.USERNAME }}/talos-kernel-rk3588:${TAG}
+          docker run --rm -t -v ./_out:/out -v /dev:/dev --privileged ghcr.io/${{ env.USERNAME }}/imager:${{ github.ref_name }} \
+            installer --arch arm64 \
+              --overlay-image=ghcr.io/${{ env.USERNAME }}/talos-sbc-rk3588@${{ github.env }} \
+              --overlay-name=rk3588 \
+              --overlay-option="board=${{ matrix.variant.board }}" \
+              --overlay-option="chipset=${{ matrix.variant.chipset }}"
+
+      - name: Push installer image
+        if: github.event_name != 'pull_request'
+        run: |
+          crane push _out/installer-arm64.tar ghcr.io/${{ env.USERNAME }}/talos-rk3588:${{ github.ref_name }}-${{ matrix.variant.board }}
+
+      - name: Build flashable image
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          docker run --rm -t -v ./_out:/out -v /dev:/dev --privileged ghcr.io/${{ env.USERNAME }}/imager:${{ github.ref_name}} \
+          metal --arch arm64 \
+            --overlay-image=ghcr.io/${{ env.USERNAME }}/talos-sbc-rk3588@${{ github.env }} \
+            --overlay-name=rk3588 \
+            --overlay-option="board=${{ matrix.variant.board }}" \
+            --overlay-option="chipset=${{ matrix.variant.chipset }}"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: talos-metal-${{ matrix.variant.chipset }}-${{ matrix.variant.board }}-${{ github.ref_name }}.raw.xz
+          path: _out/metal-arm64.raw.xz
+
+  release:
+    needs: [overlay, boards]
+    runs-on: [self-hosted]
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - uses: actions/download-artifact@v4
 
       - name: Release
-        if: startsWith(github.ref, 'refs/tags/')
         uses: crazy-max/ghaction-github-release@v2
         with:
-          draft: "true"
+          files: talos-metal-*.raw.xz
