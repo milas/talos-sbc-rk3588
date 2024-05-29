@@ -87,8 +87,8 @@ jobs:
       - name: Build & push Talos imager
         if: github.event_name != 'pull_request'
         run: |
-          cd ./talos
           export TAG=$(git describe --tag --always --dirty --match 'v[0-9]*')
+          cd ./talos
           make imager PUSH=true PKG_KERNEL=ghcr.io/${{ env.USERNAME }}/talos-rk3588-kernel:${TAG}
 
       - name: Release
