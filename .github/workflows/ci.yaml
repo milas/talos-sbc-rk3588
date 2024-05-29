@@ -19,6 +19,7 @@ env:
   PLATFORM: linux/arm64
   INSTALLER_ARCH: targetarch
   USERNAME: ${{ github.repository_owner }}
+  TALOS_VERSION: v1.7.2
 
 jobs:
   sbc-rk3588:
@@ -133,12 +134,15 @@ jobs:
               --overlay-image=ghcr.io/${{ env.USERNAME }}/talos-sbc-rk3588:${{ env.SBC_RK3588_TAG }} \
               --overlay-name=rk3588 \
               --overlay-option="board=${{ matrix.variant.board }}" \
-              --overlay-option="chipset=${{ matrix.variant.chipset }}"
+              --overlay-option="chipset=${{ matrix.variant.chipset }}" \
+              --base-installer-image="ghcr.io/siderolabs/installer:${{ env.TALOS_VERSION }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push installer image
         if: github.event_name != 'pull_request'
         run: |
-          echo "${{ github.token }}" | crane auth login ghcr.io --username "${{ env.USERNAME }}" --password-stdin
+          echo "${{ secrets.GITHUB_TOKEN }}" | crane auth login ghcr.io --username "${{ env.USERNAME }}" --password-stdin
           crane push _out/installer-arm64.tar ghcr.io/${{ env.USERNAME }}/talos-rk3588:${{ env.IMAGER_TAG }}-${{ matrix.variant.board }}
 
       - name: Build flashable image
@@ -149,7 +153,10 @@ jobs:
             --overlay-image=ghcr.io/${{ env.USERNAME }}/talos-sbc-rk3588:${{ env.SBC_RK3588_TAG }} \
             --overlay-name=rk3588 \
             --overlay-option="board=${{ matrix.variant.board }}" \
-            --overlay-option="chipset=${{ matrix.variant.chipset }}"
+            --overlay-option="chipset=${{ matrix.variant.chipset }}" \
+            --base-installer-image="ghcr.io/${{ env.USERNAME }}/talos-rk3588:${{ env.IMAGER_TAG }}-${{ matrix.variant.board }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/upload-artifact@v4
         with:
