@@ -90,7 +90,7 @@ jobs:
           export PKG_KERNEL="ghcr.io/${{ env.USERNAME }}/talos-kernel-rk3588:${{ steps.build-overlay.outputs.SBC_RK3588_TAG }}"
           echo "PKG_KERNEL=${PKG_KERNEL}" >> "$GITHUB_ENV"
 
-          make imager
+          cd talos/ && make imager
       - name: Login to registry
         if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
