@@ -161,10 +161,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Prepare flashable image for upload
+        run: |
+          docker run --rm -t -v ./_out:/out alpine mv /out/metal-arm64.raw.xz /out/talos-metal-${{ matrix.variant.chipset }}-${{ matrix.variant.board }}-${{ env.IMAGER_TAG }}.raw.xz
+
       - uses: actions/upload-artifact@v4
         with:
-          name: talos-metal-${{ matrix.variant.chipset }}-${{ matrix.variant.board }}-${{ env.IMAGER_TAG }}.raw.xz
-          path: _out/metal-arm64.raw.xz
+          name: talos-metal-${{ matrix.variant.chipset }}-${{ matrix.variant.board }}-${{ env.IMAGER_TAG }}
+          path: _out/talos-metal-*.raw.xz
+          compression-level: 0 # already compressed
+          if-no-files-found: error
 
       - name: Cleanup
         if: always()
@@ -189,4 +195,4 @@ jobs:
         uses: crazy-max/ghaction-github-release@v2
         with:
           files: |
-            */talos-metal-*.raw.xz
+            talos-metal-*.raw.xz
