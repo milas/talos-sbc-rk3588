@@ -166,6 +166,14 @@ jobs:
           name: talos-metal-${{ matrix.variant.chipset }}-${{ matrix.variant.board }}-${{ env.IMAGER_TAG }}.raw.xz
           path: _out/metal-arm64.raw.xz
 
+      - name: Cleanup
+        if: always()
+        continue-on-error: true
+        run: |
+          crane auth logout ghcr.io
+          # HACK: files are owned by root, (ab)use Docker as sudo
+          docker run --rm -t -v ./_out:/out alpine sh -c 'rm -rf /out/*'
+
   release:
     needs: [boards]
     runs-on: [self-hosted]
