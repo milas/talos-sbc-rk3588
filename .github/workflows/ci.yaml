@@ -82,13 +82,17 @@ jobs:
         if: github.event_name != 'pull_request'
         run: |
           make PUSH=true
-      - name: Checkout Talos repo
+      - name: Checkout upstream Talos repo
         uses: actions/checkout@v4
         with:
-          repository: milas/rock5-talos
-          ref: release-1.7
+          repository: siderolabs/talos
+          ref: ${{ env.TALOS_VERSION }}
           fetch-depth: 0
           path: ./talos
+      - name: Patch upstream Talos
+        working-directory: talos
+        run: |
+          git apply ../hack/patches/talos/*.patch
       - name: Build RK3588 Talos imager
         id: build-imager
         run: |
