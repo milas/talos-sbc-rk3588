@@ -1,3 +1,3 @@
 go 1.22.1
 
-use ./installers/rock5b/src
+use ./installers/rk3588/src
