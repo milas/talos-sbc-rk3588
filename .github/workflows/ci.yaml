@@ -88,7 +88,7 @@ jobs:
       - name: Build RK3588 Talos imager
         working-directory: ./talos
         run: |
-          export PKG_KERNEL=ghcr.io/${{ env.USERNAME }}/talos-kernel-rk3588:${{ steps.push.outputs.SBC_RK3588_TAG }}"
+          export PKG_KERNEL="ghcr.io/${{ env.USERNAME }}/talos-kernel-rk3588:${{ steps.push.outputs.SBC_RK3588_TAG }}"
           echo "PKG_KERNEL=${PKG_KERNEL}" >> "$GITHUB_ENV"
           make imager
       - name: Login to registry
