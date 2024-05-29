@@ -21,7 +21,7 @@ env:
   USERNAME: ${{ github.repository_owner }}
 
 jobs:
-  overlay:
+  default:
     permissions:
       actions: read
       contents: write
@@ -104,7 +104,7 @@ jobs:
         run: |
           make imager PUSH=true
   boards:
-    needs: [overlay, imager]
+    needs: [default]
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: [self-hosted]
     strategy:
