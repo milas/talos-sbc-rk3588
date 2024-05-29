@@ -21,7 +21,7 @@ env:
   USERNAME: ${{ github.repository_owner }}
 
 jobs:
-  default:
+  sbc-rk3588:
     permissions:
       actions: read
       contents: write
@@ -63,8 +63,10 @@ jobs:
         with:
           fetch-depth: 0
       - name: Build RK3588 overlay
+        id: build-overlay
         run: |
           make
+          echo "SBC_RK3588_TAG=$(git describe --tag --always --dirty --match 'v[0-9]*')" >> "$GITHUB_OUTPUT"
       - name: Login to registry
         if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
@@ -73,11 +75,9 @@ jobs:
           registry: ghcr.io
           username: ${{ env.USERNAME }}
       - name: Push RK3588 overlay to registry
-        id: push
         if: github.event_name != 'pull_request'
         run: |
           make PUSH=true
-          echo "SBC_RK3588_TAG=$(git describe --tag --always --dirty --match 'v[0-9]*')" >> "$GITHUB_OUTPUT"
       - name: Checkout Talos repo
         uses: actions/checkout@v4
         with:
@@ -86,10 +86,10 @@ jobs:
           fetch-depth: 0
           path: ./talos
       - name: Build RK3588 Talos imager
-        working-directory: ./talos
         run: |
-          export PKG_KERNEL="ghcr.io/${{ env.USERNAME }}/talos-kernel-rk3588:${{ steps.push.outputs.SBC_RK3588_TAG }}"
+          export PKG_KERNEL="ghcr.io/${{ env.USERNAME }}/talos-kernel-rk3588:${{ steps.build-overlay.outputs.SBC_RK3588_TAG }}"
           echo "PKG_KERNEL=${PKG_KERNEL}" >> "$GITHUB_ENV"
+
           make imager
       - name: Login to registry
         if: github.event_name != 'pull_request'
@@ -104,7 +104,7 @@ jobs:
         run: |
           make imager PUSH=true
   boards:
-    needs: [default]
+    needs: [sbc-rk3588]
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: [self-hosted]
     strategy:
@@ -122,7 +122,7 @@ jobs:
         run: |
           docker run --rm -t -v ./_out:/out -v /dev:/dev --privileged ghcr.io/${{ env.USERNAME }}/imager:${{ github.ref_name }} \
             installer --arch arm64 \
-              --overlay-image=ghcr.io/${{ env.USERNAME }}/talos-sbc-rk3588@${{ github.env }} \
+              --overlay-image=ghcr.io/${{ env.USERNAME }}/talos-sbc-rk3588:${{ github.ref_name }} \
               --overlay-name=rk3588 \
               --overlay-option="board=${{ matrix.variant.board }}" \
               --overlay-option="chipset=${{ matrix.variant.chipset }}"
@@ -137,7 +137,7 @@ jobs:
         run: |
           docker run --rm -t -v ./_out:/out -v /dev:/dev --privileged ghcr.io/${{ env.USERNAME }}/imager:${{ github.ref_name}} \
           metal --arch arm64 \
-            --overlay-image=ghcr.io/${{ env.USERNAME }}/talos-sbc-rk3588@${{ github.env }} \
+            --overlay-image=ghcr.io/${{ env.USERNAME }}/talos-sbc-rk3588:${{ github.ref_name }} \
             --overlay-name=rk3588 \
             --overlay-option="board=${{ matrix.variant.board }}" \
             --overlay-option="chipset=${{ matrix.variant.chipset }}"
