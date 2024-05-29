@@ -19,4 +19,4 @@ vars:
   linux_sha256: e02aa92d7f7aa29f97967a87854e8a3d7efbfc46eecf40573372f209699f8d80
   linux_sha512: ccb5717abcb557583ec09fda1eefa73f8bcd426a53e0baa969a452e908c6a38ac923d101fe421c425f282650b6e90e82af6651734e5d95630dbaf2cac82724f8
 labels:
-  org.opencontainers.image.source: https://github.com/milas/talos-sbc-rock5
+  org.opencontainers.image.source: https://github.com/milas/talos-sbc-rk3588

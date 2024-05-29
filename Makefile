@@ -51,7 +51,7 @@ PKGS ?= v1.7.0
 
 # targets defines all the available targets
 
-TARGETS = talos-sbc-rock5b
+TARGETS = talos-sbc-rk3588
 TARGETS += talos-rk3588-kernel
 
 # help menu

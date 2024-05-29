@@ -1,4 +1,4 @@
-name: talos-sbc-rock5b
+name: talos-sbc-rk3588
 variant: scratch
 shell: /toolchain/bin/bash
 dependencies:
