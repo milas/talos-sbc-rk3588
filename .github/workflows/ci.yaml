@@ -178,8 +178,12 @@ jobs:
     needs: [boards]
     runs-on: [self-hosted]
     if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
     steps:
       - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
 
       - name: Release
         uses: crazy-max/ghaction-github-release@v2
