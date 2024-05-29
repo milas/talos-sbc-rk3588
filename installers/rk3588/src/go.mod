@@ -1,4 +1,4 @@
-module rock5b
+module rk3588
 
 go 1.22.1
 

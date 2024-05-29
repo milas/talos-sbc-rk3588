@@ -5,7 +5,7 @@ dependencies:
   - image: "{{ .BUILD_ARG_PKGS_PREFIX }}/tools:{{ .BUILD_ARG_PKGS }}"
 steps:
   - sources:
-      # HACK(rock5): use collabora's branch, there's still some outstanding changes in mainline
+      # HACK(rk3588): use collabora's branch, there's still some outstanding changes in mainline
       - url: https://gitlab.collabora.com/hardware-enablement/rockchip-3588/linux/-/archive/{{ .linux_ref }}/linux-{{ .linux_ref }}.tar.bz2
         destination: linux.tar.bz2
         sha256: "{{ .linux_sha256 }}"
