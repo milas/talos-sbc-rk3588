@@ -115,8 +115,6 @@ jobs:
           - board: rock-5b
             chipset: rk3588
     steps:
-      - uses: imjasonh/setup-crane@v0.3
-
       - name: Build installer image
         if: github.event_name != 'pull_request'
         run: |
@@ -130,6 +128,7 @@ jobs:
       - name: Push installer image
         if: github.event_name != 'pull_request'
         run: |
+          echo "${{ github.token }}" | crane auth login ghcr.io --username "${{ env.USERNAME }}" --password-stdin
           crane push _out/installer-arm64.tar ghcr.io/${{ env.USERNAME }}/talos-rk3588:${{ github.ref_name }}-${{ matrix.variant.board }}
 
       - name: Build flashable image
