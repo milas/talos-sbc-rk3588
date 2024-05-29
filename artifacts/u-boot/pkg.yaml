@@ -1,0 +1,8 @@
+name: u-boot
+variant: scratch
+dependencies:
+  - stage: u-boot-rock-5a
+  - stage: u-boot-rock-5b
+finalize:
+  - from: /rootfs
+    to: /rootfs

@@ -1,14 +1,19 @@
 name: talos-sbc-rock5b
 variant: scratch
+shell: /toolchain/bin/bash
 dependencies:
+  - stage: base
   - stage: rk3588
-  - stage: u-boot-rock5b
+  - stage: u-boot
     platform: linux/arm64
   - stage: talos-rk3588-kernel
     platform: linux/arm64
-    from: /dtb/rockchip/rk3588-rock-5b.dtb
-    to: /rootfs/artifacts/arm64/dtb/rockchip/rk3588-rock-5b.dtb
   - stage: profiles
+steps:
+  - prepare:
+      - |
+        mkdir -p /rootfs/artifacts/arm64/dtb/rockchip
+        cp /dtb/rockchip/rk3588*.dtb /rootfs/artifacts/arm64/dtb/rockchip/
 finalize:
   - from: /rootfs
     to: /
