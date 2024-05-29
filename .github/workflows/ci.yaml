@@ -104,6 +104,7 @@ jobs:
         run: |
           make imager PUSH=true
   boards:
+    needs: [overlay, imager]
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: [self-hosted]
     strategy:
@@ -147,7 +148,7 @@ jobs:
           path: _out/metal-arm64.raw.xz
 
   release:
-    needs: [overlay, boards]
+    needs: [boards]
     runs-on: [self-hosted]
     if: startsWith(github.ref, 'refs/tags/')
     steps:
