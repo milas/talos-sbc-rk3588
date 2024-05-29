@@ -1,23 +1,17 @@
 # References:
 #   U-Boot:
 #     - https://u-boot.readthedocs.io/en/latest
-name: u-boot
+name: u-boot-prepare
 variant: scratch
 shell: /toolchain/bin/bash
 dependencies:
   - stage: base
-  - stage: rkbin
 steps:
   - sources:
       - url: https://gitlab.collabora.com/hardware-enablement/rockchip-3588/u-boot/-/archive/{{ .uboot_version }}/u-boot-{{ .uboot_version }}.tar.bz2
         destination: u-boot.tar.bz2
         sha256: "{{ .uboot_sha256 }}"
         sha512: "{{ .uboot_sha512 }}"
-    env:
-      SOURCE_DATE_EPOCH: {{ .BUILD_ARG_SOURCE_DATE_EPOCH }}
-      ROCKCHIP_TPL: /libs/rkbin/bin/rk35/rk3588_ddr_lp4_2112MHz_lp5_2400MHz_v1.16.bin
-      BL31: /libs/rkbin/bin/rk35/rk3588_bl31_v1.45.elf
-      CFLAGS: "-DCONFIG_LOG=y -DCONFIG_LOG_CONSOLE=y -DCONFIG_LOG_MAX_LEVEL=9"
     prepare:
       - |
         mkdir -p /usr/bin \
@@ -27,15 +21,18 @@ steps:
         pip3 install pyelftools setuptools
 
         tar xf u-boot.tar.bz2 --strip-components=1
-      - |
-        make rock5b-rk3588_defconfig
-    build:
-      - |
-        make -j $(nproc) HOSTLDLIBS_mkimage="-lssl -lcrypto"
     install:
       - |
-        mkdir -p /rootfs/artifacts/arm64/u-boot/rock5b
-        cp -v u-boot-rockchip.bin /rootfs/artifacts/arm64/u-boot/rock5b
+        mkdir -p /src
+        cp -a . /src/
 finalize:
-  - from: /rootfs
-    to: /rootfs
+  - from: /src
+    to: /src
+  - from: /toolchain
+    to: /toolchain
+  - from: /usr
+    to: /usr
+  - from: /bin
+    to: /bin
+  - from: /lib
+    to: /lib

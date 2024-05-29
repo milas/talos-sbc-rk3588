@@ -6,6 +6,7 @@ package main
 
 import (
 	_ "embed"
+	"errors"
 	"fmt"
 	"github.com/siderolabs/go-copy/copy"
 	"github.com/siderolabs/talos/pkg/machinery/overlay"
@@ -16,23 +17,38 @@ import (
 )
 
 const (
-	off int64 = 512 * 64
-	// https://github.com/u-boot/u-boot/blob/4de720e98d552dfda9278516bf788c4a73b3e56f/configs/rock-pi-4c-rk3399_defconfig#L7=
-	dtb = "rockchip/rk3588-rock-5b.dtb"
+	ubootOffset int64 = 512 * 64
 )
 
 func main() {
-	adapter.Execute[rock5BExtraOptions](&Rock5BInstaller{})
+	adapter.Execute[rk3588ExtraOpts](&RK3588Installer{})
 }
 
-type Rock5BInstaller struct{}
+type RK3588Installer struct{}
 
-type rock5BExtraOptions struct {
-	Console    []string `json:"console"`
-	ConfigFile string   `json:"configFile"`
+type rk3588ExtraOpts struct {
+	Board   string `json:"board"`
+	Chipset string `json:"chipset"`
 }
 
-func (i *Rock5BInstaller) GetOptions(extra rock5BExtraOptions) (overlay.Options, error) {
+func ChipsetName(o rk3588ExtraOpts) string {
+	if o.Chipset != "" {
+		return o.Chipset
+	}
+	switch o.Board {
+	case "rock-5a":
+		return "rk3588s"
+	case "rock-5b":
+		return "rk3588"
+	}
+	return ""
+}
+
+func (i *RK3588Installer) GetOptions(extra rk3588ExtraOpts) (overlay.Options, error) {
+	if extra.Board == "" {
+		return overlay.Options{}, errors.New("board variant required")
+	}
+
 	kernelArgs := []string{
 		"sysctl.kernel.kexec_load_disabled=1",
 		"talos.dashboard.disabled=1",
@@ -49,10 +65,8 @@ func (i *Rock5BInstaller) GetOptions(extra rock5BExtraOptions) (overlay.Options,
 		"coherent_pool=2M",
 	}
 
-	kernelArgs = append(kernelArgs, extra.Console...)
-
 	return overlay.Options{
-		Name:       "rock5b",
+		Name:       extra.Board,
 		KernelArgs: kernelArgs,
 		PartitionOptions: overlay.PartitionOptions{
 			Offset: 2048 * 10,
@@ -60,23 +74,28 @@ func (i *Rock5BInstaller) GetOptions(extra rock5BExtraOptions) (overlay.Options,
 	}, nil
 }
 
-func (i *Rock5BInstaller) Install(options overlay.InstallOptions[rock5BExtraOptions]) error {
-	var f *os.File
+func (i *RK3588Installer) Install(options overlay.InstallOptions[rk3588ExtraOpts]) error {
+	if options.ExtraOptions.Board == "" {
+		return errors.New("board variant required")
+	}
+	if options.ExtraOptions.Chipset == "" {
+		return errors.New("chipset variant required")
+	}
 
+	var f *os.File
 	f, err := os.OpenFile(options.InstallDisk, os.O_RDWR|unix.O_CLOEXEC, 0o666)
 	if err != nil {
-		return fmt.Errorf("failed to open %s: %w", options.InstallDisk, err)
+		return fmt.Errorf("opening install disk: %w", err)
 	}
-
 	defer f.Close() //nolint:errcheck
 
-	uboot, err := os.ReadFile(filepath.Join(options.ArtifactsPath, "arm64/u-boot/rock5b/u-boot-rockchip.bin"))
+	uboot, err := os.ReadFile(filepath.Join(options.ArtifactsPath, fmt.Sprintf("arm64/u-boot/%s/u-boot-rockchip.bin", options.ExtraOptions.Board)))
 	if err != nil {
-		return err
+		return fmt.Errorf("reading u-boot: %w", err)
 	}
 
-	if _, err = f.WriteAt(uboot, off); err != nil {
-		return err
+	if _, err = f.WriteAt(uboot, ubootOffset); err != nil {
+		return fmt.Errorf("writing u-boot: %w", err)
 	}
 
 	// NB: In the case that the block device is a loopback device, we sync here
@@ -87,6 +106,7 @@ func (i *Rock5BInstaller) Install(options overlay.InstallOptions[rock5BExtraOpti
 		return err
 	}
 
+	dtb := filepath.Join("rockchip", fmt.Sprintf("%s-%s.dtb", ChipsetName(options.ExtraOptions), options.ExtraOptions.Board))
 	src := filepath.Join(options.ArtifactsPath, "arm64/dtb", dtb)
 	dst := filepath.Join(options.MountPrefix, "/boot/EFI/dtb", dtb)
 

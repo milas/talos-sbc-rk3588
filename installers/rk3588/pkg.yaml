@@ -1,4 +1,4 @@
-name: rock5b
+name: rk3588
 variant: scratch
 shell: /toolchain/bin/bash
 dependencies:
@@ -14,12 +14,12 @@ steps:
         export PATH=${PATH}:${TOOLCHAIN}/go/bin
 
         cd /pkg/src
-        CGO_ENABLED=0 go build -o ./rock5b .
+        CGO_ENABLED=0 go build -o ./rk3588 .
     install:
       - |
         mkdir -p /rootfs/installers/
 
-        cp -p /pkg/src/rock5b /rootfs/installers/rock5b
+        cp -p /pkg/src/rk3588 /rootfs/installers/rk3588
 finalize:
   - from: /rootfs
     to: /rootfs

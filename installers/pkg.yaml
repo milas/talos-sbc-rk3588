@@ -1,8 +1,8 @@
 name: talos-sbc-rock5b
 variant: scratch
 dependencies:
-  - stage: rock5b
-  - stage: u-boot
+  - stage: rk3588
+  - stage: u-boot-rock5b
     platform: linux/arm64
   - stage: talos-rk3588-kernel
     platform: linux/arm64
