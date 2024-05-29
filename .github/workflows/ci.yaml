@@ -19,7 +19,7 @@ env:
   PLATFORM: linux/arm64
   INSTALLER_ARCH: targetarch
   USERNAME: ${{ github.repository_owner }}
-  TALOS_VERSION: v1.7.2
+  TALOS_VERSION: v1.7.3
 
 jobs:
   sbc-rk3588:
