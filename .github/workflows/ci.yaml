@@ -89,7 +89,7 @@ jobs:
         run: |
           export TAG=$(git describe --tag --always --dirty --match 'v[0-9]*')
           cd ./talos
-          make imager PUSH=true PKG_KERNEL=ghcr.io/${{ env.USERNAME }}/talos-rk3588-kernel:${TAG}
+          make imager PUSH=true PKG_KERNEL=ghcr.io/${{ env.USERNAME }}/talos-kernel-rk3588:${TAG}
 
       - name: Release
         if: startsWith(github.ref, 'refs/tags/')

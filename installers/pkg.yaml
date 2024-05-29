@@ -6,7 +6,7 @@ dependencies:
   - stage: rk3588
   - stage: u-boot
     platform: linux/arm64
-  - stage: talos-rk3588-kernel
+  - stage: talos-kernel-rk3588
     platform: linux/arm64
   - stage: profiles
 steps:

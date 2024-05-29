@@ -1,4 +1,4 @@
-name: talos-rk3588-kernel
+name: talos-kernel-rk3588
 variant: scratch
 shell: /toolchain/bin/bash
 dependencies:
