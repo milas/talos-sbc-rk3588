@@ -188,4 +188,5 @@ jobs:
       - name: Release
         uses: crazy-max/ghaction-github-release@v2
         with:
-          files: talos-metal-*.raw.xz
+          files: |
+            */talos-metal-*.raw.xz
