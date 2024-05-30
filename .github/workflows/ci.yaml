@@ -173,7 +173,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: talos-metal-${{ matrix.variant.chipset }}-${{ matrix.variant.board }}-${{ env.SBC_RK3588_TAG }}
-          path: _out/talos-metal-*.raw.xz
+          path: _out/talos-*.raw.xz
           compression-level: 0 # already compressed
           if-no-files-found: error
 
