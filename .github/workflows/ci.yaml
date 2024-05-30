@@ -35,7 +35,7 @@ jobs:
       - pkgs
     if: (!startsWith(github.head_ref, 'renovate/') && !startsWith(github.head_ref, 'dependabot/'))
     outputs:
-      image_tag: ${{ steps.build-overlay.outputs.SBC_RK3588_TAG }}
+      SBC_RK3588_TAG: ${{ steps.build-overlay.outputs.SBC_RK3588_TAG }}
     steps:
       - name: gather-system-info
         id: system-info
@@ -151,28 +151,28 @@ jobs:
         if: github.event_name != 'pull_request'
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | crane auth login ghcr.io --username "${{ env.USERNAME }}" --password-stdin
-          crane push _out/installer-arm64.tar ghcr.io/${{ env.USERNAME }}/talos-rk3588:${{ env.IMAGER_TAG }}-${{ matrix.variant.board }}
+          crane push _out/installer-arm64.tar ghcr.io/${{ env.USERNAME }}/talos-rk3588:${{ env.SBC_RK3588_TAG }}-${{ matrix.variant.board }}
 
       - name: Build flashable image
         if: startsWith(github.ref, 'refs/tags/')
         run: |
-          docker run --rm -t -v ./_out:/out -v /dev:/dev --privileged ghcr.io/${{ env.USERNAME }}/imager:${{ env.IMAGER_TAG }} \
+          docker run --rm -t -v ./_out:/out -v /dev:/dev --privileged ghcr.io/${{ env.USERNAME }}/imager:${{ env.SBC_RK3588_TAG }} \
           metal --arch arm64 \
             --overlay-image=ghcr.io/${{ env.USERNAME }}/talos-sbc-rk3588:${{ env.SBC_RK3588_TAG }} \
             --overlay-name=rk3588 \
             --overlay-option="board=${{ matrix.variant.board }}" \
             --overlay-option="chipset=${{ matrix.variant.chipset }}" \
-            --base-installer-image="ghcr.io/${{ env.USERNAME }}/talos-rk3588:${{ env.IMAGER_TAG }}-${{ matrix.variant.board }}"
+            --base-installer-image="ghcr.io/${{ env.USERNAME }}/talos-rk3588:${{ env.SBC_RK3588_TAG }}-${{ matrix.variant.board }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Prepare flashable image for upload
         run: |
-          docker run --rm -t -v ./_out:/out alpine mv /out/metal-arm64.raw.xz /out/talos-metal-${{ matrix.variant.chipset }}-${{ matrix.variant.board }}-${{ env.IMAGER_TAG }}.raw.xz
+          docker run --rm -t -v ./_out:/out alpine mv /out/metal-arm64.raw.xz /out/talos-${{ env.SBC_RK3588_TAG }}-${{ matrix.variant.board }}.raw.xz
 
       - uses: actions/upload-artifact@v4
         with:
-          name: talos-metal-${{ matrix.variant.chipset }}-${{ matrix.variant.board }}-${{ env.IMAGER_TAG }}
+          name: talos-metal-${{ matrix.variant.chipset }}-${{ matrix.variant.board }}-${{ env.SBC_RK3588_TAG }}
           path: _out/talos-metal-*.raw.xz
           compression-level: 0 # already compressed
           if-no-files-found: error
@@ -200,4 +200,4 @@ jobs:
         uses: crazy-max/ghaction-github-release@v2
         with:
           files: |
-            talos-metal-*.raw.xz
+            talos-*.raw.xz
