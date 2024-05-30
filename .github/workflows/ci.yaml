@@ -92,7 +92,15 @@ jobs:
       - name: Patch upstream Talos
         working-directory: talos
         run: |
-          git apply ../hack/patches/talos/*.patch
+          git config --global user.email "ci-noreply@milas.dev"
+          git config --global user.name "Build User"
+          find ../hack/patches/talos \
+            -name '*.patch' \
+            -type f \
+            -print0 \
+          | sort -z \
+          | xargs -r0 git am --whitespace=fix
+
       - name: Build RK3588 Talos imager
         id: build-imager
         run: |

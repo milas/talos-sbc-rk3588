@@ -1,8 +1,11 @@
-commit b40f5a8dd43c586183befc1d887353891cf3d054
-Author: Milas Bowman <devnull@milas.dev>
-Date:   Wed May 29 17:56:58 2024 -0400
+From cab0fca0db26c387d14c4dfcd7054cb252a9f44e Mon Sep 17 00:00:00 2001
+From: Milas Bowman <devnull@milas.dev>
+Date: Thu, 30 May 2024 12:47:47 -0400
+Subject: [PATCH] HACK(rock5): remove non-existent kernel modules
 
-    HACK(rock5): remove non-existent kernel modules
+---
+ hack/modules-arm64.txt | 28 ----------------------------
+ 1 file changed, 28 deletions(-)
 
 diff --git a/hack/modules-arm64.txt b/hack/modules-arm64.txt
 index 3b0720302..65b73bf15 100644
@@ -51,3 +54,6 @@ index 3b0720302..65b73bf15 100644
  kernel/net/ipv4/ip_gre.ko
  kernel/net/openvswitch/vport-gre.ko
  kernel/net/tls/tls.ko
+-- 
+2.44.1
+
