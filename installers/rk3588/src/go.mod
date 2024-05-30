@@ -4,7 +4,7 @@ go 1.22.3
 
 require (
 	github.com/siderolabs/go-copy v0.1.0
-	github.com/siderolabs/talos/pkg/machinery v1.7.3
+	github.com/siderolabs/talos/pkg/machinery v1.7.4
 	golang.org/x/sys v0.20.0
 )
 
