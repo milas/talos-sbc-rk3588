@@ -4,9 +4,9 @@ format: v1alpha2
 
 vars:
   # renovate: datasource=github-tags extractVersion=^v(?<version>.*)$ depName=u-boot/u-boot
-  uboot_version: 5557bfdc869a2b4f5c5394e6702d32ed5768c7ba # 2024.01-rk3588
-  uboot_sha256: b56026253205f45605edee46d415511ab1bdfc77fe3d80ab47fce66f8dba6875
-  uboot_sha512: 9bef96ee388cccca1cd03418d3f2309f5a63c7928fcc08d016a5ced3d87f7e42d74787d666ced15f2eb0d3115c41900f2b7a8d2d96905607816cf403625b7a8f
+  uboot_version: 889c316b59e2d715063f65931d7f2040e154fc4a # 2024.01-rk3588 + stable MAC address
+  uboot_sha256: 9195dacef05fd9fb3c43996b8d71fa03e74a377b408b5e181a5233832a72757d
+  uboot_sha512: 4959452c567cedddaf7c62f9b04db2927ed3be3c847ad61fb9a839d6b549f26b2c427c5df7c3e9ea05ea7632e49b623b28d07f41f0d386a8831275fa75067df8
 
   # renovate: datasource=git-refs versioning=git depName=https://github.com/rockchip/rkbin
   rkbin_ref: a2a0b89b6c8c612dca5ed9ed8a68db8a07f68bc0
