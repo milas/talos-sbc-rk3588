@@ -1,12 +1,13 @@
-name: talos-sbc-rk3588
+name: talos-sbc-rk3588-{{ .BUILD_ARG_KERNEL_VARIANT }}
 variant: scratch
 shell: /toolchain/bin/bash
 dependencies:
   - stage: base
-  - stage: rk3588
   - stage: u-boot
     platform: linux/arm64
-  - stage: talos-kernel-rk3588
+  - stage: overlay-rk3588
+    platform: linux/arm64
+  - stage: talos-kernel-rk3588-{{ .BUILD_ARG_KERNEL_VARIANT }}
     platform: linux/arm64
   - stage: profiles
 steps:

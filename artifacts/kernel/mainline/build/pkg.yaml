@@ -1,8 +1,8 @@
-name: kernel-build
+name: kernel-build-mainline
 variant: scratch
 shell: /toolchain/bin/bash
 dependencies:
-  - stage: kernel-prepare
+  - stage: kernel-prepare-mainline
 steps:
   - env:
       CARCH: {{ if eq .ARCH "aarch64"}}arm64{{ else }}unsupported{{ end }}

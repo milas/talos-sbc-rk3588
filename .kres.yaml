@@ -2,17 +2,20 @@
 kind: pkgfile.Build
 spec:
   targets:
-    - talos-sbc-rk3588
-    - talos-kernel-rk3588
+    - talos-sbc-rk3588-mainline
+    - talos-kernel-rk3588-mainline
   extraBuildArgs:
     - PKGS_PREFIX
     - PKGS
+    - KERNEL_VARIANT
   makefile:
     extraVariables:
       - name: PKGS_PREFIX
         defaultValue: ghcr.io/siderolabs
       - name: PKGS
         defaultValue: v1.7.0
+      - name: KERNEL_VARIANT
+        defaultValue: mainline
 ---
 kind: common.Build
 spec:

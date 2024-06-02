@@ -1,4 +1,4 @@
-name: kernel-prepare
+name: kernel-prepare-mainline
 variant: scratch
 shell: /toolchain/bin/bash
 dependencies:

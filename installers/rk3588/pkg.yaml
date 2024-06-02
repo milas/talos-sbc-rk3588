@@ -1,4 +1,4 @@
-name: rk3588
+name: overlay-rk3588
 variant: scratch
 shell: /toolchain/bin/bash
 dependencies:

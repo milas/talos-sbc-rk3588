@@ -1,8 +1,8 @@
-name: talos-kernel-rk3588
+name: talos-kernel-rk3588-mainline
 variant: scratch
 shell: /toolchain/bin/bash
 dependencies:
-  - stage: kernel-build
+  - stage: kernel-build-mainline
 steps:
   - env:
       ARCH: {{ if eq .ARCH "aarch64"}}arm64{{ else }}unsupported{{ end }}

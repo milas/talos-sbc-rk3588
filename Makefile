@@ -1,6 +1,6 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED, PLEASE DO NOT EDIT.
 #
-# Generated on 2024-05-28T19:41:43Z by kres a914cae.
+# Generated on 2024-06-01T16:13:40Z by kres f249b6c.
 
 # common variables
 
@@ -43,16 +43,18 @@ COMMON_ARGS += --platform=$(PLATFORM)
 COMMON_ARGS += --build-arg=SOURCE_DATE_EPOCH=$(SOURCE_DATE_EPOCH)
 COMMON_ARGS += --build-arg=PKGS_PREFIX="$(PKGS_PREFIX)"
 COMMON_ARGS += --build-arg=PKGS="$(PKGS)"
+COMMON_ARGS += --build-arg=KERNEL_VARIANT="$(KERNEL_VARIANT)"
 
 # extra variables
 
 PKGS_PREFIX ?= ghcr.io/siderolabs
 PKGS ?= v1.7.0
+KERNEL_VARIANT ?= mainline
 
 # targets defines all the available targets
 
-TARGETS = talos-sbc-rk3588
-TARGETS += talos-kernel-rk3588
+TARGETS = talos-sbc-rk3588-mainline
+TARGETS += talos-kernel-rk3588-mainline
 
 # help menu
 
