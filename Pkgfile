@@ -14,9 +14,14 @@ vars:
   rkbin_sha512: 715253b5ef5c7fbcbce8478d4dea5ad3d1b4b738da437b5f0e9b31eed20f9bcb86cab082e4c04c69b42b6ffcc2cbb1a31079b33b968bb76826ff0dd4f83043e1
 
   # renovate: datasource=git-tags extractVersion=^v(?<version>.*)$ depName=git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
-  linux_version: 6.9.0
-  linux_ref: 23bb9c65a88c114bbe945b7ef5366bb02d3d9b80
-  linux_sha256: e02aa92d7f7aa29f97967a87854e8a3d7efbfc46eecf40573372f209699f8d80
-  linux_sha512: ccb5717abcb557583ec09fda1eefa73f8bcd426a53e0baa969a452e908c6a38ac923d101fe421c425f282650b6e90e82af6651734e5d95630dbaf2cac82724f8
+  linux_mainline_version: 6.9.0
+  linux_mainline_ref: 23bb9c65a88c114bbe945b7ef5366bb02d3d9b80
+  linux_mainline_sha256: e02aa92d7f7aa29f97967a87854e8a3d7efbfc46eecf40573372f209699f8d80
+  linux_mainline_sha512: ccb5717abcb557583ec09fda1eefa73f8bcd426a53e0baa969a452e908c6a38ac923d101fe421c425f282650b6e90e82af6651734e5d95630dbaf2cac82724f8
+
+  linux_bsp_version: 5.10.160
+  linux_bsp_ref: 9fb8c4cc0ec516870dea431c83e2d546bb57df7d
+  linux_bsp_sha256: eed1c82c5500f8408ba38940977afff12a98a92b0a0d43addb33ea5da57f0118
+  linux_bsp_sha512: 1cee5a5b1de26935e5403147fdc394d38942d277dcc0c831348a3a1733c03a5e455951345789fecba96f43b1004cef240c6324ded445548815792f38a2e0096a
 labels:
   org.opencontainers.image.source: https://github.com/milas/talos-sbc-rk3588

@@ -1,0 +1,49 @@
+name: kernel-build-bsp
+variant: scratch
+shell: /toolchain/bin/bash
+dependencies:
+  - stage: kernel-prepare-bsp
+steps:
+  - env:
+      CARCH: {{ if eq .ARCH "aarch64"}}arm64{{ else }}unsupported{{ end }}
+      ARCH: {{ if eq .ARCH "aarch64"}}arm64{{ else }}unsupported{{ end }}
+      KBUILD_CFLAGS: -Wno-error
+    prepare:
+      - |
+        cd /src
+        cp -v /pkg/config-${CARCH} .config
+        cp -v /pkg/certs/* certs/
+    build:
+      {{ if .BUILD_ARG_KERNEL_TARGET }}
+      - |
+        cd /src
+
+        make {{ .BUILD_ARG_KERNEL_TARGET }}
+      {{ else }}
+      - |
+        cd /src
+
+        make -j $(nproc)
+        make -j $(nproc) modules
+
+        if [[ "${ARCH}" == "arm64" ]]; then
+          echo "Compiling device-tree blobs"
+          make -j $(nproc) dtbs
+        fi
+      {{ end }}
+finalize:
+  {{ if .BUILD_ARG_KERNEL_TARGET }}
+  - from: /src/.config
+    to: config-{{ if eq .ARCH "aarch64"}}arm64{{ else }}unsupported{{ end }}
+  {{ else }}
+  - from: /src
+    to: /src
+  - from: /toolchain
+    to: /toolchain
+  - from: /usr
+    to: /usr
+  - from: /bin
+    to: /bin
+  - from: /lib
+    to: /lib
+  {{ end }}

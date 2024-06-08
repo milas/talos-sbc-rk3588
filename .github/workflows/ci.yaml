@@ -36,6 +36,11 @@ jobs:
     if: (!startsWith(github.head_ref, 'renovate/') && !startsWith(github.head_ref, 'dependabot/'))
     outputs:
       SBC_RK3588_TAG: ${{ steps.build-overlay.outputs.SBC_RK3588_TAG }}
+    strategy:
+      matrix:
+        kernel:
+          - bsp
+          - mainline
     steps:
       - name: gather-system-info
         id: system-info
@@ -76,12 +81,12 @@ jobs:
       - name: Build RK3588 overlay
         id: build-overlay
         run: |
-          make
+          make talos-kernel-rk3588-${{ matrix.kernel }} talos-sbc-rk3588-${{ matrix.kernel }}
           echo "SBC_RK3588_TAG=$(git describe --tag --always --dirty --match 'v[0-9]*')" >> "$GITHUB_OUTPUT"
       - name: Push RK3588 overlay to registry
         if: github.event_name != 'pull_request'
         run: |
-          make PUSH=true
+          make PUSH=true talos-kernel-rk3588-${{ matrix.kernel }} talos-sbc-rk3588-${{ matrix.kernel }}
       - name: Checkout upstream Talos repo
         uses: actions/checkout@v4
         with:
@@ -105,15 +110,15 @@ jobs:
         working-directory: ./talos
         run: |
           make imager \
-            PKG_KERNEL="ghcr.io/${{ env.USERNAME }}/talos-kernel-rk3588:${{ steps.build-overlay.outputs.SBC_RK3588_TAG }}" \
+            PKG_KERNEL="ghcr.io/${{ env.USERNAME }}/talos-kernel-rk3588-${{ matrix.kernel }}:${{ steps.build-overlay.outputs.SBC_RK3588_TAG }}" \
             TAG=${{ steps.build-overlay.outputs.SBC_RK3588_TAG }}
       - name: Push RK3588 Talos imager
         if: github.event_name != 'pull_request'
         working-directory: ./talos
         run: |
           make imager \
-            PKG_KERNEL="ghcr.io/${{ env.USERNAME }}/talos-kernel-rk3588:${{ steps.build-overlay.outputs.SBC_RK3588_TAG }}" \
-            TAG=${{ steps.build-overlay.outputs.SBC_RK3588_TAG }} \
+            PKG_KERNEL="ghcr.io/${{ env.USERNAME }}/talos-kernel-rk3588-${{ matrix.kernel }}:${{ steps.build-overlay.outputs.SBC_RK3588_TAG }}" \
+            TAG=${{ steps.build-overlay.outputs.SBC_RK3588_TAG }}-${{ matrix.kernel }} \
             PUSH=true
 
   boards:
@@ -125,10 +130,13 @@ jobs:
     runs-on: [self-hosted]
     strategy:
       matrix:
-        variant:
-          - board: rock-5a
+        kernel:
+          - bsp
+          - mainline
+        board:
+          - name: rock-5a
             chipset: rk3588s
-          - board: rock-5b
+          - name: rock-5b
             chipset: rk3588
     env:
       SBC_RK3588_TAG: ${{ needs.sbc-rk3588.outputs.SBC_RK3588_TAG }}
@@ -136,13 +144,13 @@ jobs:
       - name: Build installer image
         if: github.event_name != 'pull_request'
         run: |
-          docker run --rm -t -v ./_out:/out -v /dev:/dev --privileged ghcr.io/${{ env.USERNAME }}/imager:${{ env.SBC_RK3588_TAG }} \
+          docker run --rm -t -v ./_out:/out -v /dev:/dev --privileged ghcr.io/${{ env.USERNAME }}/imager:${{ env.SBC_RK3588_TAG }}-${{ matrix.kernel }} \
             installer --arch arm64 \
               --base-installer-image="ghcr.io/siderolabs/installer:${{ env.TALOS_VERSION }}" \
               --overlay-name=rk3588 \
               --overlay-image=ghcr.io/${{ env.USERNAME }}/talos-sbc-rk3588:${{ env.SBC_RK3588_TAG }} \
-              --overlay-option="board=${{ matrix.variant.board }}" \
-              --overlay-option="chipset=${{ matrix.variant.chipset }}" \
+              --overlay-option="board=${{ matrix.board.name }}" \
+              --overlay-option="chipset=${{ matrix.board.chipset }}" \
               --system-extension-image="${{ env.REALKTEK_FIRMWARE_EXTENSION_IMAGE }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -151,28 +159,28 @@ jobs:
         if: github.event_name != 'pull_request'
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | crane auth login ghcr.io --username "${{ env.USERNAME }}" --password-stdin
-          crane push _out/installer-arm64.tar ghcr.io/${{ env.USERNAME }}/talos-rk3588:${{ env.SBC_RK3588_TAG }}-${{ matrix.variant.board }}
+          crane push _out/installer-arm64.tar ghcr.io/${{ env.USERNAME }}/talos-rk3588:${{ env.SBC_RK3588_TAG }}-${{ matrix.board.name }}-${{ matrix.kernel }}
 
       - name: Build flashable image
         if: startsWith(github.ref, 'refs/tags/')
         run: |
-          docker run --rm -t -v ./_out:/out -v /dev:/dev --privileged ghcr.io/${{ env.USERNAME }}/imager:${{ env.SBC_RK3588_TAG }} \
+          docker run --rm -t -v ./_out:/out -v /dev:/dev --privileged ghcr.io/${{ env.USERNAME }}/imager:${{ env.SBC_RK3588_TAG }}-${{ matrix.kernel }} \
           metal --arch arm64 \
-            --overlay-image=ghcr.io/${{ env.USERNAME }}/talos-sbc-rk3588:${{ env.SBC_RK3588_TAG }} \
+            --overlay-image=ghcr.io/${{ env.USERNAME }}/talos-sbc-rk3588-${{ matrix.kernel }}:${{ env.SBC_RK3588_TAG }} \
             --overlay-name=rk3588 \
-            --overlay-option="board=${{ matrix.variant.board }}" \
-            --overlay-option="chipset=${{ matrix.variant.chipset }}" \
-            --base-installer-image="ghcr.io/${{ env.USERNAME }}/talos-rk3588:${{ env.SBC_RK3588_TAG }}-${{ matrix.variant.board }}"
+            --overlay-option="board=${{ matrix.board.name }}" \
+            --overlay-option="chipset=${{ matrix.board.chipset }}" \
+            --base-installer-image="ghcr.io/${{ env.USERNAME }}/talos-rk3588:${{ env.SBC_RK3588_TAG }}-${{ matrix.board.name }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Prepare flashable image for upload
         run: |
-          docker run --rm -t -v ./_out:/out alpine mv /out/metal-arm64.raw.xz /out/talos-${{ env.SBC_RK3588_TAG }}-${{ matrix.variant.board }}.raw.xz
+          docker run --rm -t -v ./_out:/out alpine mv /out/metal-arm64.raw.xz /out/talos-${{ env.SBC_RK3588_TAG }}-${{ matrix.board.name }}-${{ matrix.kernel }}.raw.xz
 
       - uses: actions/upload-artifact@v4
         with:
-          name: talos-metal-${{ matrix.variant.chipset }}-${{ matrix.variant.board }}-${{ env.SBC_RK3588_TAG }}
+          name: talos-metal-${{ matrix.board.chipset }}-${{ matrix.board.name }}-${{ env.SBC_RK3588_TAG }}-${{ matrix.kernel }}
           path: _out/talos-*.raw.xz
           compression-level: 0 # already compressed
           if-no-files-found: error

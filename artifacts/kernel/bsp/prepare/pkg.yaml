@@ -1,21 +1,24 @@
-name: kernel-prepare-mainline
+name: kernel-prepare-bsp
 variant: scratch
 shell: /toolchain/bin/bash
 dependencies:
   - image: "{{ .BUILD_ARG_PKGS_PREFIX }}/tools:{{ .BUILD_ARG_PKGS }}"
 steps:
   - sources:
-      # HACK(rk3588): use collabora's branch, there's still some outstanding changes in mainline
-      - url: https://gitlab.collabora.com/hardware-enablement/rockchip-3588/linux/-/archive/{{ .linux_mainline_ref }}/linux-{{ .linux_mainline_ref }}.tar.bz2
-        destination: linux.tar.bz2
-        sha256: "{{ .linux_mainline_sha256 }}"
-        sha512: "{{ .linux_mainline_sha512 }}"
+      - url: https://github.com/armbian/linux-rockchip/archive/{{ .linux_bsp_ref }}.tar.gz
+        destination: linux.tar.gz
+        sha256: "{{ .linux_bsp_sha256 }}"
+        sha512: "{{ .linux_bsp_sha512 }}"
     env:
       ARCH: {{ if eq .ARCH "aarch64"}}arm64{{ else }}unsupported{{ end }}
     prepare:
       - |
-        tar -xjf linux.tar.bz2 --strip-components=1
-        rm linux.tar.bz2
+        tar -xzf linux.tar.gz --strip-components=1
+        rm linux.tar.gz
+      
+        # HACK(rock5): the BSP kernel triggers a bunch of -Werror conditions
+        # and I cannot figure out KCFLAGS etc to do this properly, so ignore everything
+        sed -i 's/KBUILD_CFLAGS   := -Wall/KBUILD_CFLAGS   := -Wno-error/' Makefile
 
         mkdir /bin
         ln -sv /toolchain/bin/bash /bin/bash
