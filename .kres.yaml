@@ -4,6 +4,8 @@ spec:
   targets:
     - talos-sbc-rk3588-mainline
     - talos-kernel-rk3588-mainline
+    - talos-sbc-rk3588-bsp
+    - talos-kernel-rk3588-bsp
   extraBuildArgs:
     - PKGS_PREFIX
     - PKGS

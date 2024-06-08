@@ -1,6 +1,6 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED, PLEASE DO NOT EDIT.
 #
-# Generated on 2024-06-01T16:13:40Z by kres f249b6c.
+# Generated on 2024-06-02T22:45:44Z by kres f249b6c.
 
 # common variables
 
@@ -55,6 +55,8 @@ KERNEL_VARIANT ?= mainline
 
 TARGETS = talos-sbc-rk3588-mainline
 TARGETS += talos-kernel-rk3588-mainline
+TARGETS += talos-sbc-rk3588-bsp
+TARGETS += talos-kernel-rk3588-bsp
 
 # help menu
 
@@ -158,3 +160,4 @@ release-notes: $(ARTIFACTS)
 conformance:
 	@docker pull $(CONFORMANCE_IMAGE)
 	@docker run --rm -it -v $(PWD):/src -w /src $(CONFORMANCE_IMAGE) enforce
+

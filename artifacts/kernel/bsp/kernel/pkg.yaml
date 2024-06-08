@@ -1,0 +1,43 @@
+name: talos-kernel-rk3588-bsp
+variant: scratch
+shell: /toolchain/bin/bash
+dependencies:
+  - stage: kernel-build-bsp
+steps:
+  - env:
+      ARCH: {{ if eq .ARCH "aarch64"}}arm64{{ else }}unsupported{{ end }}
+    install:
+      - |
+        cd /src
+
+        mkdir -p /rootfs/boot
+        mkdir -p /rootfs/dtb
+        mkdir -p /rootfs/certs
+        cp /src/certs/signing_key.x509 /rootfs/certs/signing_key.x509
+        case $ARCH in
+            x86_64)
+                mv arch/x86/boot/bzImage /rootfs/boot/vmlinuz
+            ;;
+            arm64)
+                mv arch/arm64/boot/Image /rootfs/boot/vmlinuz
+                cd ./arch/arm64/boot/dts
+                for vendor in $(find . -not -path . -type d); do
+                  dest="/rootfs/dtb/$vendor"
+                  mkdir -v $dest
+                  find ./$vendor/* -type f -name "*.dtb" -exec cp {} $dest \;
+                done
+                cd -
+            ;;
+            *)
+                echo "unsupported arch ${ARCH}"
+                exit 1
+            ;;
+        esac
+
+        export KERNELRELEASE=$(cat include/config/kernel.release)
+        make -j $(nproc) modules_install DEPMOD=/toolchain/bin/depmod INSTALL_MOD_PATH=/rootfs INSTALL_MOD_STRIP=1
+        depmod -b /rootfs $KERNELRELEASE
+        unlink /rootfs/lib/modules/$KERNELRELEASE/build
+finalize:
+  - from: /rootfs
+    to: /
