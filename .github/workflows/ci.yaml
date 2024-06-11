@@ -41,6 +41,8 @@ jobs:
         kernel:
           - bsp
           - mainline
+    env:
+      KERNEL_VARIANT: ${{ matrix.kernel }}
     steps:
       - name: gather-system-info
         id: system-info
