@@ -1,0 +1,27 @@
+name: u-boot-rock-5b
+variant: scratch
+shell: /toolchain/bin/bash
+dependencies:
+  - stage: rkbin
+  - stage: u-boot-prepare
+steps:
+  - env:
+      SOURCE_DATE_EPOCH: {{ .BUILD_ARG_SOURCE_DATE_EPOCH }}
+      ROCKCHIP_TPL: /libs/rkbin/bin/rk35/rk3588_ddr_lp4_2112MHz_lp5_2400MHz_v1.16.bin
+      BL31: /libs/rkbin/bin/rk35/rk3588_bl31_v1.45.elf
+      CFLAGS: "-DCONFIG_LOG=y -DCONFIG_LOG_CONSOLE=y -DCONFIG_LOG_MAX_LEVEL=9"
+    prepare:
+      - |
+        cd /src
+        make rock-5-itx-rk3588_defconfig
+    build:
+      - |
+        cd /src
+        make -j $(nproc) HOSTLDLIBS_mkimage="-lssl -lcrypto"
+    install:
+      - |
+        mkdir -p /rootfs/artifacts/arm64/u-boot/rock-5-itx
+        cp -v /src/u-boot-rockchip.bin /rootfs/artifacts/arm64/u-boot/rock-5-itx
+finalize:
+  - from: /rootfs
+    to: /rootfs

@@ -140,6 +140,8 @@ jobs:
             chipset: rk3588s
           - name: rock-5b
             chipset: rk3588
+          - name: rock-5itx
+            chipset: rk3588
     env:
       SBC_RK3588_TAG: ${{ needs.sbc-rk3588.outputs.SBC_RK3588_TAG }}
     steps:
